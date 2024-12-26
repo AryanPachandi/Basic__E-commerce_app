@@ -10,8 +10,7 @@ app.use(express.json());
 app.use(cors());
 dotenv.config();
 
-// const mongoString = " mongodb+srv://pachandiaryan:kIYEHHvtlC5s09NT@aryanpachandi.bew7r.mongodb.net/E-commerce"
-// const mongoose = require('mongoose');
+
 
 mongoose.connect(process.env.MONGO_URL);
 
@@ -107,8 +106,8 @@ app.post('/sell-products',authforSELLER,async (req,res)=>{
 })
 
 app.get('/get-products',authforSELLER,async (req,res)=>{
-  // const seller_id = req.seller_id
-  const products = await ProductINFOModel.find().populate("seller_id", "name emailID role");
+  const seller_id = req.seller_id
+  const products = await ProductINFOModel.find({seller_id}).populate("seller_id", "name emailID role");
 
   res.json({
     products,
@@ -118,6 +117,30 @@ app.get('/get-products',authforSELLER,async (req,res)=>{
 // seller side of selling progucts and getting list is working 
 // error handling try catch meethod json msgs remaining 
 
+app.delete('/delete-products/:id', authforSELLER, async(req,res)=>{
+  const deleteID = req.params.id;
+
+  // const query = {_id : new ObjectId('products').deleteOne(query)}
+
+  try{
+
+    const result = await ProductINFOModel.deleteOne({_id :new  mongoose.Types.ObjectId(deleteID)} );
+  if(result.deletedCount === 1){
+    res.json({
+      msg : "seller product  deleted successfully "
+    })
+  }else {
+    res.status(404).json({
+      msg : " user not found"
+    })
+  }
+  }catch (err){
+    console.log (err)
+    res.status(500).json({
+      msg : "error deleting user "
+    })
+  }
+})
 app.listen(3000, () => {
   console.log(">>working on localhost:3000");
 });
