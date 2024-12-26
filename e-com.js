@@ -15,6 +15,31 @@ dotenv.config();
 
 mongoose.connect(process.env.MONGO_URL);
 
+
+function authforSELLER(req,res,next){
+  const token = req.headers.authorization;
+  if(!token){
+    res.send(401).json({
+      msg : "token missing"
+    })
+  }
+
+  const decodedtoken = jwt.verify(token,process.env.JWT_SECRET)
+  req.seller_id = decodedtoken.id;
+  next();
+}
+function authforCONSUMER(req,res,next){
+  const token = req.headers.authorization;
+  if(!token){
+    res.send(401).json({
+      msg : "token missing"
+    })
+  }
+
+  const decodedtoken = jwt.verify(token,process.env.JWT_SECRET)
+  const consumer_id = decodedtoken.id;
+}
+
 // signup and sign-in will be same for seller and consumer
 //  the diff will be role {seller || consumer}
 
@@ -60,6 +85,47 @@ app.post("/sign-in", async (req, res) => {
 });
 //sign up signin working
 
+
+app.post('/sell-products',authforSELLER,async (req,res)=>{
+  const name = req.body.name;
+  const description = req.body.description;
+  const price = req.body.price;
+  const seller_id = req.seller_id;
+  const is_available = req.body.is_available;
+
+
+   await ProductINFOModel.create({
+    name,
+    description,
+    price,
+    seller_id,
+    is_available
+  })
+  res.json({
+    msg : "product listed successfully"
+  })
+})
+
+app.get('/get-products',authforSELLER,async (req,res)=>{
+  // const seller_id = req.seller_id
+  const products = await ProductINFOModel.find().populate("seller_id", "name emailID role");
+
+  res.json({
+    products,
+  });
+})
+
+// seller side of selling progucts and getting list is working 
+// error handling try catch meethod json msgs remaining 
+
 app.listen(3000, () => {
   console.log(">>working on localhost:3000");
 });
+
+
+// {    
+//   "name" : "sony headphones",
+//   "description" : "45db etc etc",
+//   "price" : "2000$",
+//   "is_available" : true
+// }
