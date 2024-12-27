@@ -4,7 +4,7 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const { usersINFOModel, OrdersModel, ProductINFOModel } = require("./e-comDB");
-
+const {authforSELLER, authforCONSUMER} = require("./middelwares.js")
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -13,31 +13,6 @@ dotenv.config();
 
 
 mongoose.connect(process.env.MONGO_URL);
-
-
-function authforSELLER(req,res,next){
-  const token = req.headers.authorization;
-  if(!token){
-    res.send(401).json({
-      msg : "token missing"
-    })
-  }
-
-  const decodedtoken = jwt.verify(token,process.env.JWT_SECRET)
-  req.seller_id = decodedtoken.id;
-  next();
-}
-function authforCONSUMER(req,res,next){
-  const token = req.headers.authorization;
-  if(!token){
-    res.send(401).json({
-      msg : "token missing"
-    })
-  }
-
-  const decodedtoken = jwt.verify(token,process.env.JWT_SECRET)
-  const consumer_id = decodedtoken.id;
-}
 
 // signup and sign-in will be same for seller and consumer
 //  the diff will be role {seller || consumer}
