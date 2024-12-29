@@ -39,6 +39,7 @@ app.post("/sign-up", async (req, res) => {
 });
 
 app.post("/sign-in", async (req, res) => {
+  
   const emailID = req.body.emailID;
   const password = req.body.password;
 
@@ -64,7 +65,9 @@ app.post("/sign-in", async (req, res) => {
 
 
 app.post('/sell-products',authforSELLER,async (req,res)=>{
-  const name = req.body.name;
+  try {
+
+    const name = req.body.name;
   const description = req.body.description;
   const price = req.body.price;
   const seller_id = req.seller_id;
@@ -81,15 +84,31 @@ app.post('/sell-products',authforSELLER,async (req,res)=>{
   res.json({
     msg : "product listed successfully"
   })
+
+  } catch (error) {
+    console.log(error)
+    res.send(401).json({
+      msg : "input invalid or enter all inputs"
+    })
+  }
+  
 })
 
 app.get('/seller-personal-products',authforSELLER,async (req,res)=>{
-  const seller_id = req.seller_id
+  try {
+    const seller_id = req.seller_id
   const products = await ProductINFOModel.find({seller_id}).populate("seller_id", "name emailID role");
 
   res.json({
     products,
   });
+  } catch (error) {
+    console.log(error)
+    res.send(404).json({
+      msg : "backend or database crashed!!!"
+    })
+  }
+  
 })
 
 // seller side of selling progucts and getting list is working 
