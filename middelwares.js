@@ -25,7 +25,8 @@ function authforCONSUMER(req,res,next){
   }
 
   const decodedtoken = jwt.verify(token,process.env.JWT_SECRET)
-  const consumer_id = decodedtoken.id;
+  req.consumer_id = decodedtoken.id;
+  next();
 }
 
 module.exports = {

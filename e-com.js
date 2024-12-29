@@ -119,6 +119,66 @@ app.delete('/delete-products/:id', authforSELLER, async(req,res)=>{
     })
   }
 })
+
+app.post('/order',authforCONSUMER,async(req,res)=>{
+  try{
+  const consumer_id = req.consumer_id;
+  // const seller_id = req.body.seller_id;
+  const product_id = req.body.product_id
+  
+  const product = await ProductINFOModel.findById(product_id)
+  
+    if (!product || !product.is_available) {
+    return res.status(404).json({ msg: 'Product not found or unavailable' });
+  }
+  const price =  product.price;
+  const seller_id = product.seller_id;
+
+  const order = await OrdersModel.create({
+   
+    consumer_id,
+    products :[
+      {
+      product_id : product_id,
+      seller_id : seller_id,
+      price : price,
+      }
+    ],
+    total_price : price
+  });
+  
+  
+  res.json({ msg: 'Order placed successfully', order });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ msg: 'Error placing order' });
+  }
+   
+})
+
+app.get('/consumer-orders',authforCONSUMER,async (req,res)=>{
+   try{
+  const consumer_id = req.consumer_id;
+
+  const response = await OrdersModel.find({consumer_id}).populate("consumer_id", "name")
+  .populate("products.product_id", "name description price")
+  .populate("products.seller_id", "name emailID") 
+
+  
+
+  res.json({
+    msg : "your all orders",
+    response,
+  })
+   }catch(err){
+    res.send(401).json({
+      msg : "invalid consumer id "
+    })
+    console.log(err);
+   }
+
+})
+
 app.listen(3000, () => {
   console.log(">>working on localhost:3000");
 });
