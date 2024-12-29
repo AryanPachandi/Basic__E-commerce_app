@@ -83,7 +83,7 @@ app.post('/sell-products',authforSELLER,async (req,res)=>{
   })
 })
 
-app.get('/get-products',authforSELLER,async (req,res)=>{
+app.get('/seller-personal-products',authforSELLER,async (req,res)=>{
   const seller_id = req.seller_id
   const products = await ProductINFOModel.find({seller_id}).populate("seller_id", "name emailID role");
 
@@ -178,6 +178,20 @@ app.get('/consumer-orders',authforCONSUMER,async (req,res)=>{
    }
 
 })
+
+
+app.get('/consumer-dashboard',authforCONSUMER,async(req,res)=>{
+  try{
+  const response = await ProductINFOModel.find().populate('seller_id' , 'name  emailID' )
+  res.json({
+    response,
+  })
+}catch(err){
+    res.json({
+      msg : "backend or database crashed"
+    })
+}
+});
 
 app.listen(3000, () => {
   console.log(">>working on localhost:3000");
